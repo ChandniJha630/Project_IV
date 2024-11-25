@@ -36,7 +36,7 @@
             border-radius: 8px;
             padding: 20px;
             width: 30%;
-            min-width: 300px;
+            min-width: 500px;
             max-width: 400px;
             text-align: center;
         }
@@ -49,8 +49,11 @@
         .table-container {
             margin-top: 20px;
             width: 100%;
-            max-width: 1200px;
+            max-width: 600px;
             overflow-x: auto;
+            height:300px;
+            overflow-y: auto;
+            font-size: 10px;
         }
 
         table {
@@ -103,6 +106,21 @@
         .hidden {
             display: none;
         }
+
+        .download-button {
+            background-color: #28a745;
+            border-radius: 5px;
+            color: white;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .download-button:hover {
+            background-color: #218838;
+        }
     </style>
 </head>
 <body>
@@ -115,6 +133,8 @@
         <button id="showTableBtn">
             <i class="fas fa-table"></i> Show Table
         </button>
+         <!-- Download CSV Button -->
+    <button id="downloadCSVBtn"> <i class="fas fa-download"></i>Download CSV</button>
     </div>
 
     <div class="container">
@@ -152,6 +172,8 @@
         </table>
     </div>
 
+   
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const tableBody = document.getElementById('table-body');
@@ -175,7 +197,10 @@
                         data: rainData,
                         borderColor: 'blue',
                         backgroundColor: 'rgba(0, 0, 255, 0.2)',
-                        tension: 0.4
+                        tension: 0.4,
+                        borderWidth: 1,
+                        pointHoverRadius: 1,
+                        pointRadius: 0
                     }]
                 },
                 options: {
@@ -196,7 +221,10 @@
                         data: tempData,
                         borderColor: 'red',
                         backgroundColor: 'rgba(255, 0, 0, 0.2)',
-                        tension: 0.4
+                        tension: 0.4,
+                        borderWidth: 1,
+                        pointHoverRadius: 1,
+                        pointRadius: 0
                     }]
                 },
                 options: {
@@ -217,7 +245,10 @@
                         data: humidityData,
                         borderColor: 'green',
                         backgroundColor: 'rgba(0, 255, 0, 0.2)',
-                        tension: 0.4
+                        tension: 0.4,
+                        borderWidth: 1,
+                        pointHoverRadius: 1,
+                        pointRadius: 0
                     }]
                 },
                 options: {
@@ -242,7 +273,7 @@
                     })
                     .then(data => {
                         // Check if new data exists by comparing timestamps
-                        const latestData = data.slice(-100); // Get the last 100 data points
+                        const latestData = data.slice(-500); // Get the last 100 data points
                         const newDataAvailable = latestData.some(row => {
                             return !lastFetchedTimestamp || new Date(row["Created At"] || row.CreatedAt) > lastFetchedTimestamp;
                         });
@@ -252,7 +283,7 @@
                             tableBody.innerHTML = ''; // Clear existing rows
                             latestData.forEach(row => {
                                 const tableRow = document.createElement('tr');
-                                tableRow.innerHTML = `
+                                tableRow.innerHTML = ` 
                                     <td>${row.Rain || 'N/A'}</td>
                                     <td>${row.Temprature || 'N/A'}</td>
                                     <td>${row.Humidity || 'N/A'}</td>
@@ -309,6 +340,24 @@
                 document.getElementById('rainCard').classList.add('hidden');
                 document.getElementById('tempCard').classList.add('hidden');
                 document.getElementById('humidityCard').classList.add('hidden');
+            });
+
+            // Function to download the table data as CSV
+            document.getElementById('downloadCSVBtn').addEventListener('click', () => {
+                const rows = Array.from(tableBody.querySelectorAll('tr'));
+                const csv = ['Rain,Temperature,Humidity,Created At,Prediction']; // Header
+
+                rows.forEach(row => {
+                    const cols = row.querySelectorAll('td');
+                    const rowData = Array.from(cols).map(col => col.innerText).join(',');
+                    csv.push(rowData);
+                });
+
+                const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+                const downloadLink = document.createElement('a');
+                downloadLink.href = URL.createObjectURL(csvFile);
+                downloadLink.download = 'weather_data.csv';
+                downloadLink.click();
             });
         });
     </script>
