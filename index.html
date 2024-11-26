@@ -281,9 +281,9 @@
                 latestData.forEach(row => {
                     const tableRow = document.createElement('tr');
                     tableRow.innerHTML = `
-                        <td>${row.Rain || 'N/A'}</td>
-                        <td>${row.Temprature || 'N/A'}</td>
-                        <td>${row.Humidity || 'N/A'}</td>
+                        <td>${row.Rain}</td>
+                        <td>${row.Temprature}</td>
+                        <td>${row.Humidity}</td>
                         <td>${row["Created At"] || row.CreatedAt || 'N/A'}</td>
                         <td>${row.Prediction || 'N/A'}</td>
                     `;
