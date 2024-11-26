@@ -264,62 +264,61 @@
 
             // Function to fetch and update table and graphs only if new data is added
             const updateDashboard = () => {
-                fetch('/fetchData')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! Status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        // Check if new data exists by comparing timestamps
-                        const latestData = data.slice(-500); // Get the last 100 data points
-                        const newDataAvailable = latestData.some(row => {
-                            return !lastFetchedTimestamp || new Date(row["Created At"] || row.CreatedAt) > lastFetchedTimestamp;
-                        });
+    fetch('/fetchData')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const latestData = data; // Get the latest 500 data points
+            const newestTimestamp = new Date(latestData[latestData.length - 1]["Created At"] || latestData[latestData.length - 1].CreatedAt);
 
-                        if (newDataAvailable) {
-                            // Update table
-                            tableBody.innerHTML = ''; // Clear existing rows
-                            latestData.forEach(row => {
-                                const tableRow = document.createElement('tr');
-                                tableRow.innerHTML = ` 
-                                    <td>${row.Rain || 'N/A'}</td>
-                                    <td>${row.Temprature || 'N/A'}</td>
-                                    <td>${row.Humidity || 'N/A'}</td>
-                                    <td>${row["Created At"] || row.CreatedAt || 'N/A'}</td>
-                                    <td>${row.Prediction || 'N/A'}</td>
-                                `;
-                                tableBody.appendChild(tableRow);
-                            });
+            if (!lastFetchedTimestamp || newestTimestamp > lastFetchedTimestamp) {
+                // Update table
+                tableBody.innerHTML = ''; // Clear existing rows
+                latestData.forEach(row => {
+                    const tableRow = document.createElement('tr');
+                    tableRow.innerHTML = `
+                        <td>${row.Rain || 'N/A'}</td>
+                        <td>${row.Temprature || 'N/A'}</td>
+                        <td>${row.Humidity || 'N/A'}</td>
+                        <td>${row["Created At"] || row.CreatedAt || 'N/A'}</td>
+                        <td>${row.Prediction || 'N/A'}</td>
+                    `;
+                    tableBody.appendChild(tableRow);
+                });
 
-                            // Update graphs with new data
-                            rainData.length = 0;
-                            tempData.length = 0;
-                            humidityData.length = 0;
-                            labels.length = 0;
+                // Update datasets
+                rainData.length = 0;
+                tempData.length = 0;
+                humidityData.length = 0;
+                labels.length = 0;
 
-                            latestData.forEach(row => {
-                                labels.push(row["Created At"] || row.CreatedAt || 'N/A');
-                                rainData.push(row.Rain || 0);
-                                tempData.push(row.Temprature || 0);
-                                humidityData.push(row.Humidity || 0);
-                            });
+                latestData.forEach(row => {
+                    labels.push(row["Created At"] || row.CreatedAt || 'N/A');
+                    rainData.push(row.Rain || 0);
+                    tempData.push(row.Temprature || 0);
+                    humidityData.push(row.Humidity || 0);
+                });
 
-                            // Update the charts
-                            rainChart.update();
-                            tempChart.update();
-                            humidityChart.update();
+                // Update the charts
+                rainChart.update();
+                tempChart.update();
+                humidityChart.update();
 
-                            // Update the last fetched timestamp to the most recent data point
-                            lastFetchedTimestamp = new Date(latestData[latestData.length - 1]["Created At"] || latestData[latestData.length - 1].CreatedAt);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching data:', error);
-                    });
-            };
+                // Update last fetched timestamp
+                lastFetchedTimestamp = newestTimestamp;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+};
 
+                           
+                        
             // Initial update
             updateDashboard();
 
