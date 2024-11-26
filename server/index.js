@@ -36,7 +36,7 @@ app.get('/fetchData', async (req, res) => {
         const database = client.db(db);
         const col = database.collection(collection);
 
-        const cursor = col.find();
+        const cursor = col.find().sort({ _id: -1 }).limit(500);
         const allData = await cursor.toArray();
 
         if (allData.length > 0) {
